@@ -7,17 +7,13 @@ import (
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/stdout/stdoutmetric"
-	// "go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
-	// "go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetrichttp"
-	// "go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
-	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/sdk/metric"
 	"go.opentelemetry.io/otel/sdk/trace"
-	// "go.opentelemetry.io/otel/sdk/resource"
-	// "go.opentelemetry.io/otel/semconv/v1.24.0"
+	// "go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
+	// "google.golang.org/grpc"
+	// "google.golang.org/grpc/credentials/insecure"
 )
 
 // setupOTelSDK bootstraps the OpenTelemetry pipeline.
@@ -48,7 +44,7 @@ func setupOTelSDK(ctx context.Context) (shutdown func(context.Context) error, er
 
 	// Set up trace provider.
 	// tracerProvider, err := newTraceProvider()
-	tracerProvider, err := httpTraceProvider()
+	tracerProvider, err := httpTraceProvider(ctx)
 	if err != nil {
 		handleErr(err)
 		return
@@ -75,50 +71,40 @@ func newPropagator() propagation.TextMapPropagator {
 	)
 }
 
-// func newTraceProvider() (*trace.TracerProvider, error) {
-// 	traceExporter, err := stdouttrace.New(
-// 		stdouttrace.WithPrettyPrint())
+func httpTraceProvider(ctx context.Context) (*trace.TracerProvider, error) {
+	traceExporter, err := otlptracehttp.New(
+		ctx, otlptracehttp.WithInsecure(),
+	)
+	if err != nil {
+		return nil, err
+	}
+	traceProvider := trace.NewTracerProvider(
+		trace.WithBatcher(traceExporter,
+			trace.WithBatchTimeout(time.Second)),
+	)
+	otel.SetTracerProvider(traceProvider)
+	return traceProvider, nil
+}
+
+// func grpcTraceProvider(ctx context.Context) (*trace.TracerProvider, error) {
+// 	conn, err := grpc.DialContext(ctx, "collector:4318",
+// 		grpc.WithTransportCredentials(insecure.NewCredentials()),
+// 		grpc.WithBlock(),
+// 	)
 // 	if err != nil {
 // 		return nil, err
 // 	}
-
+// 	traceExporter, err := otlptracegrpc.New(ctx, otlptracegrpc.WithGRPCConn(conn))
+// 	if err != nil {
+// 		return nil, err
+// 	}
 // 	traceProvider := trace.NewTracerProvider(
 // 		trace.WithBatcher(traceExporter,
-// 			// Default is 5s. Set to 1s for demonstrative purposes.
 // 			trace.WithBatchTimeout(time.Second)),
 // 	)
+// 	otel.SetTracerProvider(traceProvider)
 // 	return traceProvider, nil
 // }
-
-func httpTraceProvider() (*trace.TracerProvider, error) {
-	ctx := context.Background()
-	ctx, cancel := context.WithTimeout(ctx, time.Second)
-	defer cancel()
-	conn, err := grpc.DialContext(ctx, "collector:4318",
-		// Note the use of insecure transport here. TLS is recommended in production.
-		grpc.WithTransportCredentials(insecure.NewCredentials()),
-		grpc.WithBlock(),
-	)
-	if err != nil {
-		return nil, err
-	}
-	// Set up a trace exporter
-	traceExporter, err := otlptracegrpc.New(ctx, otlptracegrpc.WithGRPCConn(conn))
-	if err != nil {
-		return nil, err
-	}
-	// Register the trace exporter with a TracerProvider, using a batch
-	// span processor to aggregate spans before export.
-	bsp := trace.NewBatchSpanProcessor(traceExporter)
-	tracerProvider := trace.NewTracerProvider(
-		trace.WithSampler(trace.AlwaysSample()),
-		trace.WithSpanProcessor(bsp),
-	)
-	otel.SetTracerProvider(tracerProvider)
-
-	// Shutdown will flush any remaining spans and shut down the exporter.
-	return tracerProvider, nil
-}
 
 func newMeterProvider() (*metric.MeterProvider, error) {
 	metricExporter, err := stdoutmetric.New()

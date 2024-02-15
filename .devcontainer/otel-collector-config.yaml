@@ -3,6 +3,8 @@ receivers:
     protocols:
       grpc:
         endpoint: collector:4318
+      http:
+        endpoint: collector:4317
 
 exporters:
   debug:

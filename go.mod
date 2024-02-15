@@ -5,12 +5,11 @@ go 1.21.6
 require (
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.48.0
 	go.opentelemetry.io/otel v1.23.1
-	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.23.1
+	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp v1.23.1
 	go.opentelemetry.io/otel/exporters/stdout/stdoutmetric v1.23.1
 	go.opentelemetry.io/otel/metric v1.23.1
 	go.opentelemetry.io/otel/sdk v1.23.1
 	go.opentelemetry.io/otel/sdk/metric v1.23.1
-	google.golang.org/grpc v1.61.0
 )
 
 require (
@@ -28,5 +27,6 @@ require (
 	golang.org/x/text v0.14.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20240102182953-50ed04b92917 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240102182953-50ed04b92917 // indirect
+	google.golang.org/grpc v1.61.0 // indirect
 	google.golang.org/protobuf v1.32.0 // indirect
 )
