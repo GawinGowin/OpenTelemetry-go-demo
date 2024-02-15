@@ -2,7 +2,7 @@ receivers:
   otlp:
     protocols:
       grpc:
-        endpoint: collector:4317
+        endpoint: collector:4318
 
 exporters:
   debug:
