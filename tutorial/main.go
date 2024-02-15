@@ -75,6 +75,7 @@ func init() {
 
 func plus(x, y int, z float32) int {
 	fmt.Println(z)
+	defer fmt.Println("defer plus")
 	return (x + y)
 }
 
