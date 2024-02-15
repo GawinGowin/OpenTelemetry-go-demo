@@ -7,7 +7,7 @@ import (
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/stdout/stdoutmetric"
-	"go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
+	// "go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
 	// "go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetrichttp"
 	// "go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
@@ -75,20 +75,20 @@ func newPropagator() propagation.TextMapPropagator {
 	)
 }
 
-func newTraceProvider() (*trace.TracerProvider, error) {
-	traceExporter, err := stdouttrace.New(
-		stdouttrace.WithPrettyPrint())
-	if err != nil {
-		return nil, err
-	}
+// func newTraceProvider() (*trace.TracerProvider, error) {
+// 	traceExporter, err := stdouttrace.New(
+// 		stdouttrace.WithPrettyPrint())
+// 	if err != nil {
+// 		return nil, err
+// 	}
 
-	traceProvider := trace.NewTracerProvider(
-		trace.WithBatcher(traceExporter,
-			// Default is 5s. Set to 1s for demonstrative purposes.
-			trace.WithBatchTimeout(time.Second)),
-	)
-	return traceProvider, nil
-}
+// 	traceProvider := trace.NewTracerProvider(
+// 		trace.WithBatcher(traceExporter,
+// 			// Default is 5s. Set to 1s for demonstrative purposes.
+// 			trace.WithBatchTimeout(time.Second)),
+// 	)
+// 	return traceProvider, nil
+// }
 
 func httpTraceProvider() (*trace.TracerProvider, error) {
 	ctx := context.Background()
