@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/exporters/stdout/stdoutmetric"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
+	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetrichttp"
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/sdk/metric"
 	"go.opentelemetry.io/otel/sdk/trace"
@@ -53,7 +53,8 @@ func setupOTelSDK(ctx context.Context) (shutdown func(context.Context) error, er
 	otel.SetTracerProvider(tracerProvider)
 
 	// Set up meter provider.
-	meterProvider, err := newMeterProvider()
+	// meterProvider, err := newMeterProvider()
+	meterProvider, err := httpMeterProvider(ctx)
 	if err != nil {
 		handleErr(err)
 		return
@@ -82,7 +83,6 @@ func httpTraceProvider(ctx context.Context) (*trace.TracerProvider, error) {
 		trace.WithBatcher(traceExporter,
 			trace.WithBatchTimeout(time.Second)),
 	)
-	otel.SetTracerProvider(traceProvider)
 	return traceProvider, nil
 }
 
@@ -106,15 +106,15 @@ func httpTraceProvider(ctx context.Context) (*trace.TracerProvider, error) {
 // 	return traceProvider, nil
 // }
 
-func newMeterProvider() (*metric.MeterProvider, error) {
-	metricExporter, err := stdoutmetric.New()
+func httpMeterProvider(ctx context.Context) (*metric.MeterProvider, error) {
+	metricExporter, err := otlpmetrichttp.New(
+		ctx, otlpmetrichttp.WithInsecure(),
+	)
 	if err != nil {
 		return nil, err
 	}
-
 	meterProvider := metric.NewMeterProvider(
 		metric.WithReader(metric.NewPeriodicReader(metricExporter,
-			// Default is 1m. Set to 3s for demonstrative purposes.
 			metric.WithInterval(3*time.Second))),
 	)
 	return meterProvider, nil
