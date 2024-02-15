@@ -12,15 +12,15 @@ services:
     volumes:
       - ../:/workspace
 
-  # collector:
-  #   image: otel/opentelemetry-collector-contrib:latest
-  #   tty: true
-  #   restart: always
-  #   ports:
-  #     - "4317:4317"
-  #   volumes:
-  #     - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml
-  #   command: ["--config=/etc/otel-collector-config.yaml"]
+  collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    tty: true
+    restart: always
+    ports:
+      - "4317:4317"
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml
+    command: ["--config=/etc/otel-collector-config.yaml"]
 
   # jaeger:
   #   image: "jaegertracing/all-in-one:latest"

@@ -9,8 +9,9 @@ func init(){
 }
 
 func anything() {
+	defer println("defer child() first")
 	println("anything()")
-	defer println("defer anything()")
+	defer println("defer child() last")
 }
 
 func testRecover(src interface{}){

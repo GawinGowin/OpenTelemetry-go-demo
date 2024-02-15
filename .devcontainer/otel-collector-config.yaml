@@ -26,11 +26,11 @@ service:
   pipelines:
     traces:
       receivers: [otlp]
-      exporters: [debug, zipkin, otlp/jaeger]
+      exporters: [debug]
       processors: [batch]
     metrics:
       receivers: [otlp]
-      exporters: [debug, otlphttp/prometheus]
+      exporters: [debug]
       processors: [batch]
     logs:
       receivers: [otlp]
