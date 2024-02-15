@@ -30,10 +30,15 @@ func init() {
 	}
 }
 
-
 func rolldice(w http.ResponseWriter, r *http.Request) {
 	ctx, span := tracer.Start(r.Context(), "roll")
+	defer span.End()
+
 	roll := 1 + rand.Intn(6)
+
+	rolllValueAttr := attribute.Int("roll.value", roll)
+	span.SetAttributes(rolllValueAttr)
+	rollCnt.Add(ctx, 1, metric.WithAttributes(rolllValueAttr))
 
 	resp := strconv.Itoa(roll) + "\n"
 	if _, err := io.WriteString(w, resp); err != nil {
