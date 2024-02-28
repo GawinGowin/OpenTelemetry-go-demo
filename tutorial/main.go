@@ -4,16 +4,20 @@ import (
 	"fmt"
 )
 
+type Stringify interface {
+	ToString() string
+}
+
+type Person struct {
+	Name string
+	Age int
+} 
+
+func (p *Person) ToString() string {
+	return fmt.Sprintf("%s(%d)", p.Name, p.Age)
+}
+
 func main() {
-	defer fmt.Println("defer main() first")
-	anything()
-	defer fmt.Println("defer main() last")
-}
-
-func init() {
-	fmt.Println("init1()")
-}
-
-func init() {
-	fmt.Println("init2()")
+	v := Stringify(&Person{"Maria", 20})
+	fmt.Println(v.ToString())
 }
